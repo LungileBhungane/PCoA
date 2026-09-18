@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Interactive PCoA Biplot</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.9/dat.gui.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    #plot { width: 100%; height: 90vh; }
+  </style>
+</head>
+<body>
+  <h2 style="text-align:center;">Interactive PCoA Biplot</h2>
+  <div id="plot"></div>
+  <script>
+    // --- Example data (replace with your CSV parsing logic) ---
+    // Metadata (from merged_metadata.csv)
+    const metadata = [
+      {filename:"Acid-Dam-C18-1.mzML", type:"SAMPLE", resin:"C18", source:"Dam", treatment:"Acid"},
+      {filename:"Acid-Sea-C18-1.mzML", type:"SAMPLE", resin:"C18", source:"Marine", treatment:"Acid"},
+      {filename:"River-C18-1.mzML", type:"SAMPLE", resin:"C18", source:"River", treatment:"Neutral"},
+      {filename:"Tap-C18-1.mzML", type:"SAMPLE", resin:"C18", source:"Tap", treatment:"Neutral"}
+    ];
+
+    // Fake PCoA coordinates (replace with real computation)
+    const coords = {
+      "Acid-Dam-C18-1.mzML": {PC1:0.1, PC2:0.3},
+      "Acid-Sea-C18-1.mzML": {PC1:-0.2, PC2:0.4},
+      "River-C18-1.mzML": {PC1:0.5, PC2:-0.1},
+      "Tap-C18-1.mzML": {PC1:-0.3, PC2:-0.2}
+    };
+
+    // --- Initial plot ---
+    function plotPCoA(colorBy="source") {
+      const x = [], y = [], text = [], colors = [];
+      metadata.forEach(m => {
+        x.push(coords[m.filename].PC1);
+        y.push(coords[m.filename].PC2);
+        text.push(m.filename);
+        colors.push(m[colorBy]);
+      });
+
+      const trace = {
+        x: x,
+        y: y,
+        text: text,
+        mode: 'markers',
+        type: 'scatter',
+        marker: { size: 12, color: colors, colorscale: 'Set1' }
+      };
+
+      const layout = {
+        xaxis: { title: "PC1" },
+        yaxis: { title: "PC2" },
+        title: "PCoA Biplot"
+      };
+
+      Plotly.newPlot('plot', [trace], layout);
+    }
+
+    plotPCoA();
+
+    // --- GUI controls ---
+    const gui = new dat.GUI();
+    const options = {
+      normalization: false,
+      scaling: false,
+      imputation: false,
+      blankSubtraction: false,
+      distanceMetric: "braycurtis",
+      color
